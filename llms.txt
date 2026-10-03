@@ -1,0 +1,56 @@
+# pico-mcp
+
+> Expose pico-ioc components as MCP tools, resources and prompts
+
+Install: `pip install pico-mcp`. Import surface: `from pico_mcp import ...`.
+
+## Usage
+
+```python
+from mcp.server.mcpserver import MCPServer
+from pico_boot import init
+from pico_ioc import component
+from pico_mcp import prompt, resource, tool
+
+
+@component
+class Orders:
+    def __init__(self, repo: OrderRepository):
+        self.repo = repo
+
+    @tool(description="Look up an order by id")
+    def get_order(self, order_id: str) -> Order:
+        return self.repo.get(order_id)
+
+    @resource("orders://{order_id}")
+    def order_text(self, order_id: str) -> str:
+        return self.repo.get(order_id).summary()
+
+    @prompt()
+    def review(self, order_id: str) -> str:
+        """Ask the model to review an order."""
+        return f"Review order {order_id} and flag anything unusual."
+
+
+server = init(modules=["orders"]).get(MCPServer)
+server.run()                              # stdio: Claude Code, Claude Desktop, Cursor
+# server.run(transport="streamable-http") # http://127.0.0.1:8000/mcp
+```
+
+## Public API
+
+- `class McpServerFactory` — Provides the SDK's ``MCPServer`` with every marked component method registered.
+- `class McpSettings` — Identity the server announces to MCP clients.
+- `prompt(**options)` — Expose a component method as an MCP prompt.
+- `resource(uri: str, **options)` — Expose a component method as an MCP resource; ``{param}`` in ``uri`` makes a template.
+- `tool(**options)` — Expose a component method as an MCP tool.
+
+## Docs
+
+- docs/CHANGELOG.md
+- docs/architecture.md
+- docs/faq.md
+- docs/getting-started.md
+- docs/reference/ (2 pages)
+- docs/skills.md
+- docs/troubleshooting.md

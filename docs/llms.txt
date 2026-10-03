@@ -1,0 +1,22 @@
+# pico-mcp
+
+> Expose pico-ioc components as MCP tools, resources and prompts (Model Context Protocol, official mcp SDK)
+
+## Docs
+
+- [Home](https://dperezcabrera.github.io/pico-mcp/)
+- [Getting Started](https://dperezcabrera.github.io/pico-mcp/getting-started/)
+- [Architecture](https://dperezcabrera.github.io/pico-mcp/architecture/)
+- [index](https://dperezcabrera.github.io/pico-mcp/reference/)
+- [API](https://dperezcabrera.github.io/pico-mcp/reference/api/)
+- [AI Coding Skills](https://dperezcabrera.github.io/pico-mcp/skills/)
+- [FAQ](https://dperezcabrera.github.io/pico-mcp/faq/)
+- [Troubleshooting](https://dperezcabrera.github.io/pico-mcp/troubleshooting/)
+- [Changelog](https://dperezcabrera.github.io/pico-mcp/CHANGELOG/)
+
+## For agents
+
+- [Full docs in one file](https://dperezcabrera.github.io/pico-mcp/llms-full.txt)
+- [AGENTS.md (conventions and boundaries)](https://raw.githubusercontent.com/dperezcabrera/pico-mcp/main/AGENTS.md)
+- [Flagship use case (whole ecosystem wired)](https://dperezcabrera.github.io/pico-boot/flagship/)
+- [PyPI](https://pypi.org/project/pico-mcp/)
