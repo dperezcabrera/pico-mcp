@@ -36,9 +36,13 @@ class Orders:
     def __init__(self, repo: OrderRepository):
         self.repo = repo
 
-    @tool(description="Look up an order by id")
+    @tool(description="Look up an order by id", read_only=True)
     def get_order(self, order_id: str) -> Order:
         return self.repo.get(order_id)
+
+    @tool(destructive=True)
+    def cancel_order(self, order_id: str) -> None:
+        self.repo.cancel(order_id)
 
     @resource("orders://{order_id}")
     def order_text(self, order_id: str) -> str:
@@ -56,6 +60,8 @@ server.run()                              # stdio: Claude Code, Claude Desktop, 
 ```
 
 The input schema comes from the method signature (minus `self`), the description from the docstring or `description=`. Every call resolves the component through the container, so constructor injection, scopes and `@intercepted_by` interceptors apply as for any other caller. Two components declaring the same tool, resource or prompt name fail at startup instead of shadowing each other.
+
+`read_only`, `destructive`, `idempotent` and `open_world` become the standard MCP tool annotations (`readOnlyHint`, `destructiveHint`...). Clients use them to decide what to confirm with the user, and an approval gateway such as [pico-tool-gateway](https://github.com/dperezcabrera/pico-tool-gateway) can route by them: read-only calls pass, destructive ones wait for a human. A tool without flags says nothing, which the MCP spec reads as possibly destructive.
 
 Name the server with config:
 

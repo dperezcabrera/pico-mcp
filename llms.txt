@@ -18,9 +18,13 @@ class Orders:
     def __init__(self, repo: OrderRepository):
         self.repo = repo
 
-    @tool(description="Look up an order by id")
+    @tool(description="Look up an order by id", read_only=True)
     def get_order(self, order_id: str) -> Order:
         return self.repo.get(order_id)
+
+    @tool(destructive=True)
+    def cancel_order(self, order_id: str) -> None:
+        self.repo.cancel(order_id)
 
     @resource("orders://{order_id}")
     def order_text(self, order_id: str) -> str:
@@ -43,7 +47,7 @@ server.run()                              # stdio: Claude Code, Claude Desktop, 
 - `class McpSettings` — Identity the server announces to MCP clients.
 - `prompt(**options)` — Expose a component method as an MCP prompt.
 - `resource(uri: str, **options)` — Expose a component method as an MCP resource; ``{param}`` in ``uri`` makes a template.
-- `tool(**options)` — Expose a component method as an MCP tool.
+- `tool(*, read_only: bool | None=None, destructive: bool | None=None, idempotent: bool | None=None, open_world: bool | None=None, **options)` — Expose a component method as an MCP tool.
 
 ## Docs
 

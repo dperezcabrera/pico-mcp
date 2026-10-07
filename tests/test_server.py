@@ -169,3 +169,52 @@ def test_duplicate_names_fail_fast(make_container):
     dup.A, dup.B = A, B
     with pytest.raises(Exception, match="duplicate MCP tool 'lookup'"):
         make_container(dup).get(MCPServer)
+
+
+async def test_semantic_flags_become_standard_annotations(make_container):
+    @component
+    class Ledger:
+        @tool(read_only=True)
+        def balance(self, account: str) -> int:
+            return 0
+
+        @tool(destructive=True, idempotent=False, open_world=True)
+        def wire(self, account: str, cents: int) -> str:
+            return "sent"
+
+        @tool(destructive=False, idempotent=True)
+        def tag(self, account: str, label: str) -> str:
+            return label
+
+    ledger = types.ModuleType("ledger_tools")
+    ledger.Ledger = Ledger
+    server = make_container(ledger).get(MCPServer)
+    async with Client(server) as client:
+        tools = {t.name: t.annotations for t in (await client.list_tools()).tools}
+    assert tools["balance"].read_only_hint is True
+    assert tools["balance"].destructive_hint is False
+    assert tools["wire"].read_only_hint is None
+    assert (tools["wire"].destructive_hint, tools["wire"].idempotent_hint, tools["wire"].open_world_hint) == (
+        True,
+        False,
+        True,
+    )
+    assert (tools["tag"].destructive_hint, tools["tag"].idempotent_hint) == (False, True)
+
+
+async def test_tools_without_flags_carry_no_annotations(server):
+    async with Client(server) as client:
+        tools = {t.name: t for t in (await client.list_tools()).tools}
+    assert tools["get_order"].annotations is None
+
+
+def test_read_only_and_destructive_conflict():
+    with pytest.raises(ValueError, match="read-only tool cannot be destructive"):
+        tool(read_only=True, destructive=True)
+
+
+def test_flags_and_raw_annotations_are_exclusive():
+    from mcp.types import ToolAnnotations
+
+    with pytest.raises(TypeError, match="not both"):
+        tool(read_only=True, annotations=ToolAnnotations())
